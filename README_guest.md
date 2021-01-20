@@ -25,13 +25,13 @@
 1. 고객이 멤버십을 가입한다
 1. 멤버십 가입이 완료 되면 마일리지를 준다
 1. 고객이 멤버십을 탈퇴할 수 있다
-1. 멤버십 탈퇴가 완료 되면 마일리지가 삭제된다
+1. 멤버십 탈퇴가 완료 되면 마일리지가 소멸된다
 1. 고객은 가입 시 부여된 포인트를 조회할 수 있다
 1. 멤버십 가입이 완료되면 메일로 알림을 보낸다
 
 비기능적 요구사항
 1. 트랜잭션
-    1. 고객이 멤버십을 탈퇴할 때 반드시 마일리지 삭제가 전제되어야 한다  Sync 호출 
+    1. 고객이 멤버십을 탈퇴할 때 반드시 마일리지 소멸이 전제되어야 한다  Sync 호출 
 1. 장애격리
     1. 마일리지 부여 기능이 수행되지 않더라도 멤버십 가입은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
     1. 마일리지 부여 기능이 과중되면 마일지지 부여 기능을 잠시동안 받지 않고 잠시후에 처리 하도록 유도한다  Circuit breaker, fallback
@@ -109,23 +109,23 @@
 ### 비기능 요구사항에 대한 검증
 
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
-        - 고객 취소시 배송처리:  배송이 취소되지 않은 주문은 취소되지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문취소 전 배송취소 처리에 대해서는 Request-Response 방식 처리
-        - 나머지 모든 inter-microservice 트랜잭션: 주문, 회수 등 모든 이벤트와 같이 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
+        - 멤버십 탈퇴 시 마일리지 처리:  마일리지가 소멸되지 않으면 멤버십 탈퇴가 되지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 멤버십 탈퇴 전 마일리지 소멸 처리에 대해서는 Request-Response 방식 처리
+        - 나머지 모든 inter-microservice 트랜잭션: 멤버십 가입 등 모든 이벤트와 같이 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
 
 
 # 구현:
 
-분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8084 이다)
 
 ```
-cd order
+cd member
 mvn spring-boot:run
 
-cd delivery
+cd mileage
 mvn spring-boot:run 
 
-cd customercenter
+cd report
 mvn spring-boot:run  
 
 cd gateway
@@ -134,86 +134,55 @@ mvn spring-boot:run
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 order 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 member 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
 
 ```
-package clothrental;
+package membership;
 
 import javax.persistence.*;
-
-import com.esotericsoftware.kryo.util.IntArray;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
-@Table(name="Order_table")
-public class Order {
+@Table(name="MemberMgmt_table")
+public class MemberMgmt {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-    private String productId;
-    private Integer qty;
+    private Long mileageId;
+    private String name;
+    private String grade;
     private String status;
 
     @PostPersist
     public void onPostPersist(){
-        Order order = new Order();
-        order.setStatus(order.getStatus());
-        System.out.println("##### Status : " + order.getStatus());
+        Signed signed = new Signed();
+        BeanUtils.copyProperties(this, signed);
+        signed.setStatus("No Point");
+        signed.publishAfterCommit();
 
-        if (Objects.equals(status, "Order")) {
-
-            Ordered ordered = new Ordered();
-            BeanUtils.copyProperties(this, ordered);
-            ordered.publishAfterCommit();
-        }
-        if (Objects.equals(status, "Return")){
-
-            Returned returned = new Returned();
-            BeanUtils.copyProperties(this, returned);
-            returned.publishAfterCommit();
-        }
-
-    }
-
-    @PostUpdate
-    public void onPostUpdate(){
-        System.out.println("################# Order Status Updated and Update Event raised..!!");
-        OrdereCancelled ordereCancelled = new OrdereCancelled();
-        BeanUtils.copyProperties(this, ordereCancelled);
-        ordereCancelled.publishAfterCommit();
-
-        //Following code causes dependency to external APIs
-        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
-
-        clothrental.external.Cancellation cancellation = new clothrental.external.Cancellation();
-        // mappings goes here
-        // 아래 this는 Order 어그리게이트
-        cancellation.setOrderId(this.getId());
-        cancellation.setStatus("Delivery Cancelled");
-        OrderApplication.applicationContext.getBean(clothrental.external.CancellationService.class)
-                .cancelship(cancellation);
 
     }
 
     @PreRemove
-    public void onPreRemove(){
-        OrdereCancelled ordereCancelled = new OrdereCancelled();
-        BeanUtils.copyProperties(this, ordereCancelled);
-        ordereCancelled.publishAfterCommit();
+    public void PreRemove(){
+        Seceded seceded = new Seceded();
+        BeanUtils.copyProperties(this, seceded);
+        seceded.setStatus("end member");
+        seceded.publishAfterCommit();
 
         //Following code causes dependency to external APIs
         // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
-        clothrental.external.Cancellation cancellation = new clothrental.external.Cancellation();
+        membership.external.MileageMgmt mileageMgmt = new membership.external.MileageMgmt();
+        mileageMgmt.setId(seceded.getMileageId());
+        mileageMgmt.setMemberId(seceded.getId());
+        mileageMgmt.setPoint(0);
+        mileageMgmt.setStatus("removeRequest");
         // mappings goes here
-        // 아래 this는 Order 어그리게이트
-        cancellation.setOrderId(this.getId());
-        cancellation.setStatus("Delivery Cancelled");
-        OrderApplication.applicationContext.getBean(clothrental.external.CancellationService.class)
-            .cancelship(cancellation);
+        MemberApplication.applicationContext.getBean(membership.external.MileageMgmtService.class)
+            .mileageDelete(mileageMgmt);
 
 
     }
@@ -222,31 +191,36 @@ public class Order {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
-    public String getProductId() {
-        return productId;
+    public Long getMileageId() {
+        return mileageId;
     }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
+    public void setMileageId(Long id) {
+        this.mileageId = id;
     }
-    public Integer getQty() {
-        return qty;
+    public String getName() {
+        return name;
     }
-
-    public void setQty(Integer qty) {
-        this.qty = qty;
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getGrade() {
+        return grade;
+    }
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
     public String getStatus() {
         return status;
     }
-
     public void setStatus(String status) {
         this.status = status;
     }
+
+
+
 
 }
 
