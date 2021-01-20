@@ -327,9 +327,11 @@ mvn spring-boot:run
 http DELETE http://member:8080/memberMgmts/1   #Success
 
 ```
+- 마일리지 서비스 내린 경우
 
 ![member_del_err](https://user-images.githubusercontent.com/75401911/105185774-4cef0980-5b74-11eb-83ad-a562bc108cdd.png)
 
+- 마일리지 서비스 재기동한 경우
 
 ![member_del_ok](https://user-images.githubusercontent.com/75401911/105185813-58423500-5b74-11eb-8621-a933224b03d7.png)
 
