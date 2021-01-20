@@ -461,7 +461,7 @@ public class MileageMgmt {
 # Mileage 서비스를 잠시 내려놓음 
 
 # 멤버십 가입
-http http://order:8080/orders productId=1001 qty=5 status=Order   #Success
+http POST http://member:8080/memberMgmts name='lee' grade='black'   #Success
 
 # 마일리지 확인
 http http://report:8080/reports   #  마일리지 조회 안됨
@@ -482,24 +482,26 @@ http http://report:8080/reports     # 마일리지 조회됨
 ![report_pub_ok](https://user-images.githubusercontent.com/75401911/105189386-42cf0a00-5b78-11eb-8def-428ca0bb2e95.png)
 
 ```
-고객센터는 주문/배송과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 고객센터 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+마이페이지 서비스(report)는 meber/mileage 서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 마이페이지(report) 서비스가 유지보수로 인해 잠시 내려간 상태라도 멤버십 가입을 받는데 문제가 없다:
   
 ```
-package clothrental;
+(ReportRepository.java)
+
+package membership;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface MypageRepository extends CrudRepository<Mypage, Long> {
+public interface ReportRepository extends CrudRepository<Report, Long> {
 
-    List<Mypage> findByOrderId(Long orderId);
+    List<Report> findByMemberId(Long memberId);
 
 }
 
 ```
-# 고객센터 서비스 (customercenter) 를 잠시 내려놓음 (ctrl+c)
+# 마이페이지 서비스 (report) 를 잠시 내려놓음 (ctrl+c)
 
 #주문처리
 http http://order:8080/orders productId=1001 qty=5 status=Order   #Success
