@@ -1,0 +1,66 @@
+server:
+  port: 8088
+
+---
+
+spring:
+  profiles: default
+  cloud:
+    gateway:
+      routes:
+        - id: Member
+          uri: http://localhost:8081
+          predicates:
+            - Path=/memberMgmts/** 
+        - id: Mileage
+          uri: http://localhost:8082
+          predicates:
+            - Path=/mileageMgmts/** 
+        - id: Report
+          uri: http://localhost:8083
+          predicates:
+            - Path= /reports/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+
+---
+
+spring:
+  profiles: docker
+  cloud:
+    gateway:
+      routes:
+        - id: Member
+          uri: http://Member:8080
+          predicates:
+            - Path=/memberMgmts/** 
+        - id: Mileage
+          uri: http://Mileage:8080
+          predicates:
+            - Path=/mileageMgmts/** 
+        - id: Report
+          uri: http://Report:8080
+          predicates:
+            - Path= /reports/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+server:
+  port: 8080
