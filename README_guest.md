@@ -610,7 +610,11 @@ kubectl get hpa
 ```
 - 어느정도 시간이 흐른 후 스케일 아웃이 벌어지는 것을 확인할 수 있다:
 
-![오토스케일결과](https://user-images.githubusercontent.com/66341540/105006359-e5549380-5a79-11eb-8de7-1e2a85d1e2fe.JPG)
+![auto1](https://user-images.githubusercontent.com/75401911/105198986-98f47b00-5b81-11eb-88e6-0dce0c47838c.png)
+
+![auto2](https://user-images.githubusercontent.com/75401911/105199031-a4e03d00-5b81-11eb-9390-9332134b8f76.png)
+
+![auto3](https://user-images.githubusercontent.com/75401911/105199088-b32e5900-5b81-11eb-8b1a-9e43d46883c0.png)
 
 ## 무정지 재배포
 
