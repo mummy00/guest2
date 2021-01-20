@@ -457,6 +457,7 @@ public class MileageMgmt {
     }
 
 ```
+
 ```
 # Mileage 서비스를 잠시 내려놓음 
 
@@ -482,8 +483,9 @@ http http://report:8080/reports     # 마일리지 조회됨
 ![report_pub_ok](https://user-images.githubusercontent.com/75401911/105189386-42cf0a00-5b78-11eb-8def-428ca0bb2e95.png)
 
 ```
+
 마이페이지 서비스(report)는 meber/mileage 서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 마이페이지(report) 서비스가 유지보수로 인해 잠시 내려간 상태라도 멤버십 가입을 받는데 문제가 없다:
-  
+
 ```
 (ReportRepository.java)
 
