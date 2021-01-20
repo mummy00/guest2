@@ -328,10 +328,10 @@ http DELETE http://member:8080/memberMgmts/1   #Success
 
 ```
 
-![배송서비스stop한상태](https://user-images.githubusercontent.com/66341540/105003606-35c9f200-5a76-11eb-8e06-5595b19d4c38.JPG)
+![member_del_err](https://user-images.githubusercontent.com/75401911/105185774-4cef0980-5b74-11eb-83ad-a562bc108cdd.png)
 
 
-![배송서비스active한상태](https://user-images.githubusercontent.com/66341540/105001947-dff44a80-5a73-11eb-9140-fc8aa9725aaa.JPG)
+![member_del_ok](https://user-images.githubusercontent.com/75401911/105185813-58423500-5b74-11eb-8621-a933224b03d7.png)
 
 
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
