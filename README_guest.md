@@ -101,12 +101,7 @@
 # 분석/설계
 
 
-
-## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/byIxok3KxwPmNS0LTBaRBxIaWot2/mine/da2c98d4d6fc151ee88572a6ad82c909
-
-
-### 완성된 모형
+### Event Storming 결과
 
 ![image](https://user-images.githubusercontent.com/66341540/100956395-b763d000-355b-11eb-946d-1157cf5ba00e.png)
 
