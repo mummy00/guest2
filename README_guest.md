@@ -504,7 +504,7 @@ public interface ReportRepository extends CrudRepository<Report, Long> {
 }
 
 ```
-# 마이페이지 서비스 (report) 를 잠시 내려놓음 (ctrl+c)
+# 마이페이지 서비스 (report) 를 잠시 내려놓음 
 
 # 멤버십 가입
 http POST http://member:8080/memberMgmts name='cha' grade='gold'   #Success
@@ -520,6 +520,11 @@ mvn spring-boot:run
 http http://report:8080/reports       # 마일리지 목록이 조회됨
 ```
 
+![cqrs_member_assign](https://user-images.githubusercontent.com/75401911/105195288-d951fa00-5b7d-11eb-9b8a-88d46b20a0ee.png)
+
+![cqrs_report_er](https://user-images.githubusercontent.com/75401911/105195364-ea9b0680-5b7d-11eb-8515-e582584489bb.png)
+
+![cqrs_report_ok](https://user-images.githubusercontent.com/75401911/105195426-f71f5f00-5b7d-11eb-8e94-0d14372c2600.png)
 
 # 운영
 
