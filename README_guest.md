@@ -536,11 +536,11 @@ http http://report:8080/reports       # 마일리지 목록이 조회됨
 
 * 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
 
-시나리오는 주문(order)-->배송취소(delivery) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 결제 요청이 과도할 경우 CB 를 통하여 장애격리.
+시나리오는 멤버십 가입(member)--> 마일리지 (mileage) 시의 연결을 Pub/Sub 으로 구현이 되어있고, 멤버십 가입이 과도할 경우 CB 를 통하여 장애격리.
 
 - Hystrix 를 설정:  요청처리 쓰레드에서 처리시간이 610 밀리가 넘어서기 시작하여 어느정도 유지되면 CB 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정
 ```
-# application.yml
+# application.yml (member)
 
 feign:
   hystrix:
@@ -554,16 +554,14 @@ hystrix:
 
 ```
 
-- 피호출 서비스(배송:cancellation) 의 임의 부하 처리 - 500 밀리에서 증감 220 밀리 정도 왔다갔다 하게, Thread.currentThread().sleep((long) (500 + Math.random() * 220));
+- 피호출 서비스( mileage) 의 임의 부하 처리 - 3000 밀리에서 증감 3220 밀리 정도 왔다갔다 하게, Thread.currentThread().sleep((long) (3000 + Math.random() * 220));
 ```
-# (delivery) cancellation.java (Entity)
+# MileageMgmtService.java (Entity)
 
     @PrePersist
     public void onPrePersist(){
-        System.out.println("################# cancellation start");
-
         try {
-            Thread.currentThread().sleep((long) (500 + Math.random() * 220));
+            Thread.currentThread().sleep((long) (3000 + Math.random() * 220));
             // Thread.currentThread().sleep((long) (800 + Math.random() * 220));
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -572,16 +570,16 @@ hystrix:
 ```
 
 * 부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인:
-- 동시사용자 2명
-- 5초 동안 실시
+- 동시사용자 40명
+- 600초 동안 실시
 
 ```
-$ siege -c2 -t5S -v --content-type "application/json" 'http://order:8080/orders/1 PATCH {"status": "Delivery Cancelled"}'
+siege -c40 -t600S -v --content-type "application/json" 'http://member:8080/memberMgmts POST {"name": "kim", "grade":"silver"}'
 :
 :
 
 ```
-![서킷브레이크결과](https://user-images.githubusercontent.com/66341540/105006247-bb9b6c80-5a79-11eb-9c29-f2b4827269d7.JPG)
+![cb](https://user-images.githubusercontent.com/75401911/105196953-7bbead00-5b7f-11eb-95cb-8691ef6695ec.png)
 
 - 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
 
