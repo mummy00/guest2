@@ -310,21 +310,21 @@ public interface MileageMgmtService {
     }
 ```
 
-- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
+- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, mileage 서비스가 장애나면 멤버십 탈퇴도 안된다는 것을 확인:
 
 
 ```
-# 배송 (delivery) 서비스를 잠시 내려놓음 (ctrl+c)
+# 마일리지 (Mileage) 서비스를 잠시 내려놓음 
 
-#주문취소처리
-http PATCH http://order:8080/orders/2 status="Delivery Cancelled"   #Fail
+# 멤버십 탈퇴 처리
+http DELETE http://member:8080/memberMgmts/1   #Fail
 
-#배송서비스 재기동
-cd delivery
+# 마일리지 서비스 재기동
+cd mileage
 mvn spring-boot:run
 
-#주문취소처리
-http PATCH http://order:8080/orders/2 status="Delivery Cancelled"   #Success
+# 멤버십 탈퇴 처리
+http DELETE http://member:8080/memberMgmts/1   #Success
 
 ```
 
