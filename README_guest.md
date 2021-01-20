@@ -26,7 +26,7 @@
 1. 멤버십 가입이 완료 되면 마일리지를 준다
 1. 고객이 멤버십을 탈퇴할 수 있다
 1. 멤버십 탈퇴가 완료 되면 마일리지가 소멸된다
-1. 고객은 가입 시 부여된 포인트를 조회할 수 있다
+1. 고객은 가입 시 부여된 포인트, 등급을 조회할 수 있다
 1. 멤버십 가입이 완료되면 메일로 알림을 보낸다
 
 비기능적 요구사항
@@ -237,15 +237,14 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Long>
 ```
 - 적용 후 REST API 의 테스트
 ```
-# order 서비스의 주문처리
-http http://order:8080/orders productId=1001 qty=5 status=Order
+# member 서비스의 멤버십 가입
+http POST http://localhost:8081/memberMgmts name='kim' grade='sliver'
 
-# delivery 서비스의 배송취소처리
-http http://delivery:8080/cancellations orderId=1 status="Delivery Cancelled"
+# mileage 서비스의 마일리지 부여
+http http://mileage:8080/mileageMgmts
 
-# 주문 상태 확인
-http http://20.194.37.221:8080/mypages
-http http://customercenter:8080/mypages
+# 마일리지 및 등급 조회
+http http://report:8080/reports 
 
 ```
 
