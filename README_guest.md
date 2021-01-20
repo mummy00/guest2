@@ -257,14 +257,14 @@ http http://report:8080/reports
 
 ## 동기식 호출 과 Fallback 처리
 
-분석단계에서의 조건 중 하나로 주문(order)->배송취소(cancellation) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 멤버 가입(member)-> 마일리지 삭제(mileage) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
-- 배송서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
+- mileage 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
-# (order) CancellationService.java
+# (member) MileageMgmtService.java
 
-package clothrental.external;
+package membership.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -273,36 +273,39 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
 
-@FeignClient(name="delivery", url="${api.delivery.url}")
-public interface CancellationService {
+@FeignClient(name="Mileage", url="${api.mileage.url}")
+public interface MileageMgmtService {
 
-    @RequestMapping(method= RequestMethod.POST, path="/cancellations")
-    public void cancelship(@RequestBody Cancellation cancellation);
+    @RequestMapping(method= RequestMethod.POST, path="/mileageMgmts")
+    public void mileageDelete(@RequestBody MileageMgmt mileageMgmt);
 
 }
+
 ```
 
-- 배송 취소가 되면(@PostUpdate) 주문 취소가 가능하도록 처리
+- 마일리지가 소멸 처리되면(@PreRemove) 멤버십 탈퇴가 가능하도록 처리 (데이터 삭제)
 ```
-# Order.java (Entity)
+# MemberMgmt.java (Entity)
 
-    @PostUpdate
-    public void onPostUpdate(){
-        System.out.println("################# Order Status Updated and Update Event raised..!!");
-        OrdereCancelled ordereCancelled = new OrdereCancelled();
-        BeanUtils.copyProperties(this, ordereCancelled);
-        ordereCancelled.publishAfterCommit();
+    @PreRemove
+    public void PreRemove(){
+        Seceded seceded = new Seceded();
+        BeanUtils.copyProperties(this, seceded);
+        seceded.setStatus("end member");
+        seceded.publishAfterCommit();
 
         //Following code causes dependency to external APIs
         // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
-        clothrental.external.Cancellation cancellation = new clothrental.external.Cancellation();
+        membership.external.MileageMgmt mileageMgmt = new membership.external.MileageMgmt();
+        mileageMgmt.setId(seceded.getMileageId());
+        mileageMgmt.setMemberId(seceded.getId());
+        mileageMgmt.setPoint(0);
+        mileageMgmt.setStatus("removeRequest");
         // mappings goes here
-        // 아래 this는 Order 어그리게이트
-        cancellation.setOrderId(this.getId());
-        cancellation.setStatus("Delivery Cancelled");
-        OrderApplication.applicationContext.getBean(clothrental.external.CancellationService.class)
-                .cancelship(cancellation);
+        MemberApplication.applicationContext.getBean(membership.external.MileageMgmtService.class)
+            .mileageDelete(mileageMgmt);
+
 
     }
 ```
