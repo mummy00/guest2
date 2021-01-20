@@ -241,20 +241,19 @@ public interface MemberMgmtRepository extends PagingAndSortingRepository<MemberM
 # member 서비스의 멤버십 가입
 http POST http://localhost:8081/memberMgmts name='kim' grade='sliver'
 
-![member_sign](https://user-images.githubusercontent.com/75401911/105181279-f206e380-5b6e-11eb-9bda-9a2a83dac014.png)
-
 # mileage 서비스의 마일리지 부여
 http http://mileage:8080/mileageMgmts
-
-![mileagegive](https://user-images.githubusercontent.com/75401911/105181480-32666180-5b6f-11eb-85d2-980a10dbb016.png)
 
 # 마일리지 및 등급 조회
 http http://report:8080/reports 
 
-![reports](https://user-images.githubusercontent.com/75401911/105181537-4316d780-5b6f-11eb-9df1-a218ec3f4efe.png)
-
 ```
 
+![member_sign](https://user-images.githubusercontent.com/75401911/105181279-f206e380-5b6e-11eb-9bda-9a2a83dac014.png)
+
+![mileagegive](https://user-images.githubusercontent.com/75401911/105181480-32666180-5b6f-11eb-85d2-980a10dbb016.png)
+
+![reports](https://user-images.githubusercontent.com/75401911/105181537-4316d780-5b6f-11eb-9df1-a218ec3f4efe.png)
 
 ## 동기식 호출 과 Fallback 처리
 
