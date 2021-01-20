@@ -343,59 +343,59 @@ http DELETE http://member:8080/memberMgmts/1   #Success
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
-주문이 이루어진 후에 배송시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 배송 시스템의 처리를 위하여 주문이 블로킹 되지 않아도록 처리한다.
+멤버십 가입이 이루어진 후에 마일리지 서비스로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 마일리지 서비스 처리를 위하여 멤버십 서비스가 블로킹 되지 않아도록 처리한다.
  
-- 이를 위하여 주문이력에 기록을 남긴 후에 곧바로 배송이 시작되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 멤버십 이력에 기록을 남긴 후에 곧바로 마일리지가 부여되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
-package clothrental;
+(MemberMgmt.java)
+
+package membership;
 
 import javax.persistence.*;
-
-import com.esotericsoftware.kryo.util.IntArray;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
-@Table(name="Order_table")
-public class Order {
+@Table(name="MemberMgmt_table")
+public class MemberMgmt {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-    private String productId;
-    private Integer qty;
+    private Long mileageId;
+    private String name;
+    private String grade;
     private String status;
 
     @PostPersist
     public void onPostPersist(){
-        Order order = new Order();
-        order.setStatus(order.getStatus());
-        System.out.println("##### Status : " + order.getStatus());
+        Signed signed = new Signed();
+        BeanUtils.copyProperties(this, signed);
+        signed.setStatus("No Point");
+        signed.publishAfterCommit();
 
-        if (Objects.equals(status, "Order")) {
-
-            Ordered ordered = new Ordered();
-            BeanUtils.copyProperties(this, ordered);
-            ordered.publishAfterCommit();
-        }
-        if (Objects.equals(status, "Return")){
-
-            Returned returned = new Returned();
-            BeanUtils.copyProperties(this, returned);
-            returned.publishAfterCommit();
-        }
 
     }
+    
 ```
 
-- 배송 서비스에서는 배송 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 마일리지 서비스에서는 마일리지 적립 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
-package clothrental;
+(PolicyHandler.java)
 
-...
+package membership;
+
+import membership.config.kafka.KafkaProcessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class PolicyHandler{
@@ -405,64 +405,54 @@ public class PolicyHandler{
     }
 
     @Autowired
-    DeliveryRepository deliveryRepository;
+    MemberMgmtRepository memberMgmtRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverOrdered_Ship(@Payload Ordered ordered){
+    public void wheneverMileageGived_MemberStatus(@Payload MileageGived mileageGived){
 
-        if(ordered.isMe()){
-            // To-Do : SMS발송, CJ Logistics 연계, ...
-            Delivery delivery = new Delivery();
-            delivery.setOrderId(ordered.getId());
-            delivery.setStatus("Delivery Started");
+        if(mileageGived.isMe()){
 
-            deliveryRepository.save(delivery);
-
-            System.out.println("##### listener Ship : " + ordered.toJson());
+            MemberMgmt memberMgmt = memberMgmtRepository.findById(mileageGived.getMemberId()).get();
+            memberMgmt.setStatus("complete");
+            memberMgmt.setMileageId(mileageGived.getId());
+            memberMgmtRepository.save(memberMgmt);
         }
     }
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverOrdered_Ship(@Payload Returned returned){
-
-        if(returned.isMe()){
-            // To-Do : SMS발송, CJ Logistics 연계, ...
-            Delivery delivery = new Delivery();
-            delivery.setOrderId(returned.getId());
-            delivery.setStatus("Return Started");
-
-            deliveryRepository.save(delivery);
-
-            System.out.println("##### listener Ship : " + returned.toJson());
-        }
-    }
+}
 
 ```
-배송은 주문과 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+member 와 mileage 가 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, mileage 서비스가 유지보수로 인해 잠시 내려간 멤버십 가입을 받는데 문제가 없다:
   
 ```
-package clothrental;
+
+( MileageMgmt.java)
+
+package membership;
 
 import javax.persistence.*;
+
+import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="Delivery_table")
-public class Delivery {
+@Table(name="MileageMgmt_table")
+public class MileageMgmt {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-    private Long orderId;
+    private Long memberId;
+    private Integer point;
     private String status;
 
     @PostPersist
     public void onPostPersist(){
-        Shipped shipped = new Shipped();
-        BeanUtils.copyProperties(this, shipped);
-        shipped.publishAfterCommit();
 
+MileageGived mileageGived = new MileageGived();
+        BeanUtils.copyProperties(this, mileageGived);
+        mileageGived.publishAfterCommit();
 
     }
 
