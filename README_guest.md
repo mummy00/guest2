@@ -450,7 +450,7 @@ public class MileageMgmt {
     @PostPersist
     public void onPostPersist(){
 
-MileageGived mileageGived = new MileageGived();
+    MileageGived mileageGived = new MileageGived();
         BeanUtils.copyProperties(this, mileageGived);
         mileageGived.publishAfterCommit();
 
@@ -458,21 +458,28 @@ MileageGived mileageGived = new MileageGived();
 
 ```
 ```
-# 배송 서비스 (Delivery) 를 잠시 내려놓음 (ctrl+c)
+# Mileage 서비스를 잠시 내려놓음 
 
-#주문처리
+# 멤버십 가입
 http http://order:8080/orders productId=1001 qty=5 status=Order   #Success
 
-#배송목록 확인
-http http://delivery:8080/deliveries    # 배송 목록이 조회안됨
+# 마일리지 확인
+http http://report:8080/reports   #  마일리지 조회 안됨
 
-#배송 서비스 기동
-cd delivery
+# 마일리지 서비스 재기동
+cd mileage
 mvn spring-boot:run
 
-#배송목록 확인
-http http://delivery:8080/deliveries     # 모든 주문의 목록이 조회됨
+# 마일리지 재확인
+http http://report:8080/reports     # 마일리지 조회됨
 ```
+마일리지 조회 안됨
+
+![report_pub_er](https://user-images.githubusercontent.com/75401911/105189327-35b21b00-5b78-11eb-8c9c-272e71f8ed88.png)
+
+마일리지 조회됨
+
+![report_pub_ok](https://user-images.githubusercontent.com/75401911/105189386-42cf0a00-5b78-11eb-8def-428ca0bb2e95.png)
 
 ```
 고객센터는 주문/배송과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 고객센터 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
