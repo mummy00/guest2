@@ -620,7 +620,7 @@ kubectl get hpa
 
 * 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
 
-mileage 에 deployment.yaml readiness probe 없는 상태
+mileage 서비스(deployment.yaml) readiness probe 없는 상태
 
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
@@ -644,7 +644,7 @@ kubectl set image deploy member member=guest.azurecr.io/member:latest --record
 # deployment.yaml 의 readiness probe 의 설정:
 
 
-kubectl apply -f kubernetes/deployment.yaml
+kubectl apply -f deployment.yml
 ```
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
