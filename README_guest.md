@@ -587,20 +587,28 @@ siege -c40 -t600S -v --content-type "application/json" 'http://member:8080/membe
 ### 오토스케일 아웃
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
+deployment.yaml(member) 수정
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
 
-- 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
+
+- member 서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
 ```
 kubectl autoscale deploy order --min=1 --max=10 --cpu-percent=15
 ```
-- CB 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
+- CB 에서 했던 방식대로 워크로드를 1.5분 정도 걸어준다.
 ```
-siege -c150 -t60S -v --content-type "application/json" 'http://order:8080/orders/1 PATCH {"status": "Delivery Cancelled"}'
+siege -c40 -t100S -v --content-type "application/json" 'http://member:8080/memberMgmts POST {"name": "kim", "grade":"silver"}'
 ```
-- 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다: kubectl get hpa 에 대한 캡처가 필요
+- 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다
 ```
-kubectl get deploy order -w
+kubectl get pod -w
+kubectl get hpa
 ```
-- 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
+- 어느정도 시간이 흐른 후 스케일 아웃이 벌어지는 것을 확인할 수 있다:
 
 ![오토스케일결과](https://user-images.githubusercontent.com/66341540/105006359-e5549380-5a79-11eb-8de7-1e2a85d1e2fe.JPG)
 
