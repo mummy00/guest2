@@ -506,18 +506,18 @@ public interface ReportRepository extends CrudRepository<Report, Long> {
 ```
 # 마이페이지 서비스 (report) 를 잠시 내려놓음 (ctrl+c)
 
-#주문처리
-http http://order:8080/orders productId=1001 qty=5 status=Order   #Success
+# 멤버십 가입
+http POST http://member:8080/memberMgmts name='cha' grade='gold'   #Success
 
-#주문목록 확인
-http http://customercenter:8080/mypages    # 모든 주문의 목록이 조회안됨
+# 마이페이지(report) 확인
+http http://report:8080/reports      # 마일리지 목록이 조회안됨
 
-#고객센터 서비스 기동
-cd customercenter
+# 마이페이지(report) 서비스 기동
+cd report
 mvn spring-boot:run
 
-#주문목록 확인
-http http://customercenter:8080/mypages     # 모든 주문의 목록이 조회됨
+# 마이페이지 확인
+http http://report:8080/reports       # 마일리지 목록이 조회됨
 ```
 
 
