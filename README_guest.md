@@ -477,7 +477,7 @@ http http://report:8080/reports       # 마일리지 목록이 조회됨
 
 * 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
 
-시나리오는 멤버십 가입(member)--> 마일리지 (mileage) 시의 연결을 Pub/Sub 으로 구현이 되어있고, 멤버십 가입이 과도할 경우 CB 를 통하여 장애격리.
+시나리오는 멤버십 가입(member)--> 마일리지 (mileage) 시의 연결을 RESTful Request/Response 으로 구현이 되어있고, 멤버십 가입이 과도할 경우 CB 를 통하여 장애격리.
 
 - Hystrix 를 설정:  요청처리 쓰레드에서 처리시간이 610 밀리가 넘어서기 시작하여 어느정도 유지되면 CB 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정
 ```
@@ -522,7 +522,7 @@ siege -c40 -t600S -v --content-type "application/json" 'http://member:8080/membe
 ```
 ![cb](https://user-images.githubusercontent.com/75401911/105196953-7bbead00-5b7f-11eb-95cb-8691ef6695ec.png)
 
-![cb_2](https://user-images.githubusercontent.com/75401911/105259765-c0723480-5bcf-11eb-8b51-70c9c8c9e4a2.PNG)
+![cb_3](https://user-images.githubusercontent.com/75401911/105259923-2068db00-5bd0-11eb-800f-3fa866a83159.png)
 
 - 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
 
