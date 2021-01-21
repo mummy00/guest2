@@ -224,7 +224,7 @@ public interface MileageMgmtService {
 
 ```
 
-- 마일리지가 소멸 처리되면(@PreRemove) 멤버십 탈퇴가 가능하도록 처리 (데이터 삭제)
+- 마일리지가 소멸 처리되면(@PreRemove) 멤버십 탈퇴가 가능하도록 처리
 ```
 # MemberMgmt.java (Entity)
 
