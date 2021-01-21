@@ -415,11 +415,11 @@ mvn spring-boot:run
 # 마일리지 재확인
 http http://report:8080/reports     # 마일리지 조회됨
 ```
-마일리지 조회 안됨
+마이페이지에서 마일리지 조회 안됨
 
 ![report_pub_er](https://user-images.githubusercontent.com/75401911/105189327-35b21b00-5b78-11eb-8c9c-272e71f8ed88.png)
 
-마일리지 조회됨
+마이페이지에서 마일리지 조회됨
 
 ![report_pub_ok](https://user-images.githubusercontent.com/75401911/105189386-42cf0a00-5b78-11eb-8def-428ca0bb2e95.png)
 
