@@ -522,7 +522,7 @@ siege -c40 -t600S -v --content-type "application/json" 'http://member:8080/membe
 ```
 ![cb](https://user-images.githubusercontent.com/75401911/105196953-7bbead00-5b7f-11eb-95cb-8691ef6695ec.png)
 
-![cb_1](https://user-images.githubusercontent.com/75401911/105259353-f82cac80-5bce-11eb-9cb2-96a4dc474e43.png)
+![cb_2](https://user-images.githubusercontent.com/75401911/105259765-c0723480-5bcf-11eb-8b51-70c9c8c9e4a2.PNG)
 
 - 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
 
