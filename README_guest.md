@@ -520,7 +520,6 @@ siege -c40 -t600S -v --content-type "application/json" 'http://member:8080/membe
 :
 
 ```
-![cb](https://user-images.githubusercontent.com/75401911/105196953-7bbead00-5b7f-11eb-95cb-8691ef6695ec.png)
 
 ![cb_3](https://user-images.githubusercontent.com/75401911/105259923-2068db00-5bd0-11eb-800f-3fa866a83159.png)
 
