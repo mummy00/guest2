@@ -1,6 +1,6 @@
 # guest
 
-# 멤버십 가입
+# 멤버십 관리
 
 # Table of contents
 
